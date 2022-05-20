@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.mapper.UserMapper">
+    <!--完成实体类与表中列名的映射
+    private String userId;
+    private String cardType;
+    private String cardNo;
+    private String userName;
+    private String userSex;
+    private String userAge;
+    private String userRole;-->
+    <resultMap id="userMap" type="user">
+        <!--主键-->
+        <id property="userId" column="user_id"/>
+        <!--非主键-->
+        <result property="cardType" column="card_type"/>
+        <result property="cardNo" column="card_no"/>
+        <result property="userName" column="user_name"/>
+        <result property="userSex" column="user_sex"/>
+        <result property="userAge" column="user_age"/>
+        <result property="userRole" column="user_role"/>
+    </resultMap>
+    <!--定义全部列名-->
+    <sql id="allColumns">
+        user_id,card_type,card_no,user_name,user_sex,user_age,user_role
+    </sql>
+
+    <!--List<User> selectUserPage(
+            @Param("userName")
+            String userName,
+            @Param("userSex")
+            String userSex,
+            @Param("startRow")
+            int startRow);-->
+
+    <select id="selectUserPage" resultMap="userMap">
+        select <include refid="allColumns"/>
+        from t_user
+        <where>
+            <if test="userName != null and userName != ''">
+                and user_name like concat('%',#{userName},'%')
+            </if>
+            <if test="userSex != null and userSex != ''">
+                and user_sex = #{userSex}
+            </if>
+        </where>
+        limit #{startRow},5
+    </select>
+
+    <!--int createUser(User user);-->
+
+    <insert id="createUser" parameterType="user">
+        insert into t_user values (#{userId},#{cardType},#{cardNo},#{userName},#{userSex},#{userAge},#{userRole})
+    </insert>
+
+    <!--int deleteUserById(String userId);-->
+
+    <delete id="deleteUserById" parameterType="string">
+        delete from t_user where user_id = #{userId}
+    </delete>
+
+    <!--int getRowCount(
+            @Param("userName")
+            String userName,
+            @Param("userSex")
+            String userSex);-->
+
+    <select id="getRowCount" resultType="int">
+        select count(*) from t_user
+        <where>
+            <if test="userName != null and userName != ''">
+                and user_name like concat('%',#{userName},'%')
+            </if>
+            <if test="userSex != null and userSex != ''">
+                and user_sex = #{userSex}
+            </if>
+        </where>
+    </select>
+
+    <!--int updateUserById(User user);-->
+
+    <update id="updateUserById" parameterType="user">
+        update t_user set card_type = #{cardType},
+                          card_no = #{cardNo},
+                          user_name = #{userName},
+                          user_sex = #{userSex},
+                          user_age = #{userAge},
+                          user_role = #{userRole}
+        where user_id = #{userId}
+    </update>
+
+    <delete id="deleteUserByIdList" parameterType="list">
+        delete from t_user where user_id in
+        <foreach collection="list" item="userId" separator="," open="(" close=")">
+            #{userId}
+        </foreach>
+    </delete>
+</mapper>
